@@ -7,17 +7,6 @@ import mediapipe as mp
 min_x = max_x = min_y = max_y = None
 detected_once = False  # Flag
 
-
-mp_pose = mp.solutions.pose
-pose = mp_pose.Pose(
-    static_image_mode=False,
-    model_complexity=1,
-    enable_segmentation=False,
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5
-)
-mp_draw = mp.solutions.drawing_utils
-
 def detect_green_box(frame):
     global min_x, max_x, min_y, max_y, detected_once
 
@@ -42,6 +31,7 @@ def detect_green_box(frame):
             max_y = int(np.max(points[:, 1]))
             detected_once = True
 
+# Open camera
 cap = cv2.VideoCapture(0)
 
 while True:
@@ -57,26 +47,14 @@ while True:
             print(f"min_x = {min_x}, max_x = {max_x}")
             print(f"min_y = {min_y}, max_y = {max_y}")
 
-    
-    img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    results = pose.process(img_rgb)
-
-    if results.pose_landmarks:
-        # mp_draw.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-
-        nose = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
-        h, w, _ = frame.shape
-        cx, cy = int(nose.x * w), int(nose.y * h)
-        cv2.circle(frame, (cx, cy), 8, (0, 255, 0), -1)
-        cv2.putText(frame, f"HAND: {cx},{cy}", (cx+10, cy-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 2)
-
-    if min_x < cx < max_x and min_y < cy < max_y:
-        print(f"HAND is inside the box")
     # Draw box once it's detected
-    # if detected_once:
-    #     cv2.rectangle(frame, (min_x, min_y), (max_x, max_y), (0, 255, 0), 2)
+    if detected_once:
+        cv2.rectangle(frame, (min_x, min_y), (max_x, max_y), (0, 255, 0), 2)
 
+    # Show live feed
     cv2.imshow("Live Feed", frame)
+
+    # Exit with 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
