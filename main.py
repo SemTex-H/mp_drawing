@@ -1,10 +1,17 @@
 import cv2
 import numpy as np
 import mediapipe as mp
+from pythonosc.udp_client import SimpleUDPClient
+from time import sleep
+import numpy as np
 
+osc = SimpleUDPClient("127.0.0.1", 8000)
 
 # Global variables to store x, y values
+x_ = 1920
+y_ = 1080
 min_x = max_x = min_y = max_y = None
+cx = cy = None
 detected_once = False  # Flag
 
 
@@ -17,6 +24,10 @@ pose = mp_pose.Pose(
     min_tracking_confidence=0.5
 )
 mp_draw = mp.solutions.drawing_utils
+
+
+def value_mapping(value, in_min, in_max, out_min, out_max):
+    return ((value - in_min) / (in_max - in_min)) * (out_max - out_min) + out_min
 
 def detect_green_box(frame):
     global min_x, max_x, min_y, max_y, detected_once
@@ -43,6 +54,9 @@ def detect_green_box(frame):
             detected_once = True
 
 cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
 
 while True:
     ret, frame = cap.read()
@@ -70,8 +84,15 @@ while True:
         cv2.circle(frame, (cx, cy), 8, (0, 255, 0), -1)
         cv2.putText(frame, f"HAND: {cx},{cy}", (cx+10, cy-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 2)
 
-    if min_x < cx < max_x and min_y < cy < max_y:
-        print(f"HAND is inside the box")
+    if cx and cy:
+        if min_x < cx < max_x and min_y < cy < max_y:
+            # print(f"HAND is inside the box")
+            x_ = value_mapping(cx, min_x, max_x, -0.5, 0.5)
+            y_ = value_mapping(cy, min_y, max_y, 1, -1)
+            osc.send_message("/pos", [x_, y_])
+            # osc.send_message("/draw", 1)
+            # osc.send_message("/color", [255, 255, 2551])
+            
     # Draw box once it's detected
     # if detected_once:
     #     cv2.rectangle(frame, (min_x, min_y), (max_x, max_y), (0, 255, 0), 2)

@@ -34,6 +34,9 @@ def detect_green_box(frame):
 # Open camera
 cap = cv2.VideoCapture(0)
 
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -51,6 +54,7 @@ while True:
     if detected_once:
         cv2.rectangle(frame, (min_x, min_y), (max_x, max_y), (0, 255, 0), 2)
 
+    cv2.putText(frame, f"HAND", (500, 720), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 2)
     # Show live feed
     cv2.imshow("Live Feed", frame)
 
