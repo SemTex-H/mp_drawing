@@ -84,14 +84,14 @@ while True:
         cv2.circle(frame, (cx, cy), 8, (0, 255, 0), -1)
         cv2.putText(frame, f"HAND: {cx},{cy}", (cx+10, cy-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 2)
 
-    if cx and cy:
-        if min_x < cx < max_x and min_y < cy < max_y:
-            # print(f"HAND is inside the box")
-            x_ = value_mapping(cx, min_x, max_x, -0.5, 0.5)
-            y_ = value_mapping(cy, min_y, max_y, 1, -1)
-            osc.send_message("/pos", [x_, y_])
-            # osc.send_message("/draw", 1)
-            # osc.send_message("/color", [255, 255, 2551])
+        if cx and cy:
+            if min_x < cx < max_x and min_y < cy < max_y:
+                # print(f"HAND is inside the box")
+                x_ = value_mapping(cx, min_x, max_x, -0.5, 0.5)
+                y_ = value_mapping(cy, min_y, max_y, 1, -1)
+                osc.send_message("/pos", [x_, y_])
+                # osc.send_message("/draw", 1)
+                # osc.send_message("/color", [255, 255, 2551])
             
     # Draw box once it's detected
     # if detected_once:
